@@ -3,7 +3,6 @@
 #include <omp.h>
 
 int main(int argc, char* argv[]){
-	double t0 = omp_get_wtime();
 	int num_t, len, i, j, count;
 	float* vec, *res;
 	scanf("%d %d",&num_t,&len);
@@ -13,6 +12,7 @@ int main(int argc, char* argv[]){
 		scanf("%f",vec+i);
 		*(res+i) = 0.0;
 	}
+	double t0 = omp_get_wtime();
 	for(i = 0; i < len; i++){
 		count = 0;
 		for(j = 0; j < len; j++){
