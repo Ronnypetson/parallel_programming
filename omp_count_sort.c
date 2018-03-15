@@ -13,6 +13,8 @@ int main(int argc, char* argv[]){
 		scanf("%f",vec+i);
 		*(res+i) = 0.0;
 	}
+#	pragma omp parallel for num_threads(num_t) \
+		private(count)
 	for(i = 0; i < len; i++){
 		count = 0;
 		for(j = 0; j < len; j++){
@@ -21,7 +23,7 @@ int main(int argc, char* argv[]){
 		}
 		*(res+count) = *(vec+i);
 	}
-	for(j = 1; j < len; j++){
+	for(j = 1; j < len; j++){ //
 		if(*(res+j) == 0.0)
 			*(res+j) = *(res+j-1);
 	}
