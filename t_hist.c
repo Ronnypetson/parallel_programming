@@ -55,7 +55,7 @@ int * count(double min, double max, int * vet, int nbins, double h, double * val
 		min_t = min + j*h;
 		max_t = min + (j+1)*h;
 		for(i=0;i<nval;i++) {
-			if( (val[i] <= max_t && val[i] > min_t) || (j == 0 && val[i] <= min_t) ) { //
+			if( (val[i] <= max_t && val[i] > min_t) ) { // || (j == 0 && val[i] <= min_t)
 				count++;
 			}
 		}
@@ -68,6 +68,7 @@ int * count(double min, double max, int * vet, int nbins, double h, double * val
 
 void* t_count(void* par){
 	struct t_par params = *((struct t_par *)par);
+	printf("%lf %lf %d %lf %d\n",params.min,params.max,params.nbins,params.h,params.nval); // <-
 	count(params.min,params.max,params.vet,params.nbins,params.h,params.val,params.nval);
 	return NULL;
 }
@@ -112,16 +113,17 @@ int main(int argc, char * argv[]) {
 	int t_nbins, t_resto;
 	t_nbins = n/size;
 	t_resto = n%size;
+	struct t_par params[size];
 	for(thread = 0; thread < size; thread++){
-		struct t_par params;
-		params.min = min + thread*t_nbins*h;
-		params.max = max;
-		params.vet = vet+thread*t_nbins;
-		params.nbins = t_nbins + t_resto*(thread == size-1); /* A última thread fica com o resto dos bins */
-		params.h = h;
-		params.val = val;
-		params.nval = nval;
-		pthread_create(&thread_handles[thread],NULL,t_count,(void*)&params);
+		params[thread].nbins = t_nbins + t_resto*(thread == size-1); /* A última thread fica com o resto dos bins */
+		params[thread].min = min + thread*t_nbins*h;
+		params[thread].max = max;
+		params[thread].vet = vet+thread*t_nbins;
+		params[thread].h = h;
+		params[thread].val = val;
+		params[thread].nval = nval;
+		printf(". %lf %lf %d %lf %d\n",params[thread].min,params[thread].max,params[thread].nbins,params[thread].h,params[thread].nval);
+		pthread_create(&thread_handles[thread],NULL,t_count,(void*)&params[thread]);
 	}
 	//
 	for(thread = 0; thread < size; thread++)
@@ -145,7 +147,6 @@ int main(int argc, char * argv[]) {
 		printf(" %d",vet[i]);
 	}
 	printf("\n");
-	
 	
 	/* imprime o tempo de duracao do calculo */
 	printf("%lu\n",duracao);
