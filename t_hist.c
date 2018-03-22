@@ -43,10 +43,11 @@ struct t_par{	/* The parameters pointer (void*) will point to a variable of this
 	double h;
 	double* val;
 	int nval;
+	int id;
 };
 
 /* conta quantos valores no vetor estao entre o minimo e o maximo passados como parametros */
-int * count(double min, double max, int * vet, int nbins, double h, double * val, int nval) {
+int * count(double min, double max, int * vet, int nbins, double h, double * val, int nval, int id) {
 	int i, j, count;
 	double min_t, max_t;
 
@@ -55,7 +56,7 @@ int * count(double min, double max, int * vet, int nbins, double h, double * val
 		min_t = min + j*h;
 		max_t = min + (j+1)*h;
 		for(i=0;i<nval;i++) {
-			if( (val[i] <= max_t && val[i] > min_t) ) { // || (j == 0 && val[i] <= min_t)
+			if( (val[i] <= max_t && val[i] > min_t) || (id == 0 && j == 0 && val[i] <= max_t) ) { // || (j == 0 && val[i] == min_t)
 				count++;
 			}
 		}
@@ -68,8 +69,8 @@ int * count(double min, double max, int * vet, int nbins, double h, double * val
 
 void* t_count(void* par){
 	struct t_par params = *((struct t_par *)par);
-	printf("%lf %lf %d %lf %d\n",params.min,params.max,params.nbins,params.h,params.nval); // <-
-	count(params.min,params.max,params.vet,params.nbins,params.h,params.val,params.nval);
+	//printf("%lf %lf %d %lf %d %d\n",params.min,params.max,params.nbins,params.h,params.nval,params.id); // <-
+	count(params.min,params.max,params.vet,params.nbins,params.h,params.val,params.nval,params.id);
 	return NULL;
 }
 
@@ -122,7 +123,8 @@ int main(int argc, char * argv[]) {
 		params[thread].h = h;
 		params[thread].val = val;
 		params[thread].nval = nval;
-		printf(". %lf %lf %d %lf %d\n",params[thread].min,params[thread].max,params[thread].nbins,params[thread].h,params[thread].nval);
+		params[thread].id = thread;
+		//printf(". %lf %lf %d %lf %d %d\n",params[thread].min,params[thread].max,params[thread].nbins,params[thread].h,params[thread].nval,params[thread].id);
 		pthread_create(&thread_handles[thread],NULL,t_count,(void*)&params[thread]);
 	}
 	//
